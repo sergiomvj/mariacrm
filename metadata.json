@@ -1,0 +1,5 @@
+{
+  "name": "MariaCRM - RAG Knowledge System",
+  "description": "An AI-first sales development CRM with an integrated Retrieval-Augmented Generation (RAG) knowledge system. This application provides the UI for managing and querying company-approved knowledge to ensure AI-generated answers are accurate and grounded.",
+  "requestFramePermissions": []
+}
