@@ -2,25 +2,25 @@ import React, { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { KnowledgeBase } from './components/KnowledgeBase';
 import { CrmView } from './components/CrmView';
-import { AuthView } from './components/AuthView';
+import { LandingOrAuth } from './components/LandingOrAuth';
 import { MariaView } from './components/MariaView';
 import { SettingsView } from './components/SettingsView';
 import { AbTestingView } from './components/AbTestingView';
 import { CadencesView } from './components/CadencesView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { InboxView } from './components/InboxView';
-import type { User } from './types';
-import { MOCK_USER } from './constants';
+import { TasksView } from './components/TasksView';
+import type { User, Task } from './types';
+import { MOCK_USER, TASKS as INITIAL_TASKS } from './constants';
 
-export type View = 'Maria' | 'A/B Lab' | 'CRM' | 'Inbox' | 'Cadences' | 'Knowledge' | 'Analytics' | 'Settings';
+export type View = 'Maria' | 'A/B Lab' | 'CRM' | 'Inbox' | 'Cadences' | 'Knowledge' | 'Analytics' | 'Settings' | 'Tasks';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [activeView, setActiveView] = useState<View>('CRM');
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
 
   const handleLogin = () => {
-    // In a real app, this would involve an API call.
-    // Here, we'll just set a mock user.
     setUser(MOCK_USER);
     setActiveView('CRM');
   };
@@ -28,9 +28,20 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setUser(null);
   };
+  
+  const handleSaveTask = (taskToSave: Task) => {
+    setTasks(prevTasks => {
+        const taskExists = prevTasks.some(t => t.id === taskToSave.id);
+        if (taskExists) {
+            return prevTasks.map(t => t.id === taskToSave.id ? taskToSave : t);
+        } else {
+            return [taskToSave, ...prevTasks];
+        }
+    });
+  };
 
   if (!user) {
-    return <AuthView onLogin={handleLogin} />;
+    return <LandingOrAuth onLogin={handleLogin} />;
   }
 
   const renderContent = () => {
@@ -40,7 +51,9 @@ const App: React.FC = () => {
       case 'A/B Lab':
         return <AbTestingView />;
       case 'CRM':
-        return <CrmView />;
+        return <CrmView allTasks={tasks} onSaveTask={handleSaveTask} />;
+      case 'Tasks':
+        return <TasksView tasks={tasks} onSaveTask={handleSaveTask} />;
       case 'Knowledge':
         return <KnowledgeBase />;
       case 'Settings':

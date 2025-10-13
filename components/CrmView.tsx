@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { LEADS } from '../constants';
-import type { Lead } from '../types';
+import type { Lead, Task } from '../types';
 import { LeadDetailView } from './LeadDetailView';
 import { LeadFormModal } from './LeadFormModal';
 import { StatusBadge } from './StatusBadge';
+import { PriorityBadge } from './PriorityBadge';
 
 const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -11,7 +12,13 @@ const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export const CrmView: React.FC = () => {
+interface CrmViewProps {
+    allTasks: Task[];
+    onSaveTask: (task: Task) => void;
+}
+
+
+export const CrmView: React.FC<CrmViewProps> = ({ allTasks, onSaveTask }) => {
     const [leads, setLeads] = useState<Lead[]>(LEADS);
     const [filter, setFilter] = useState('');
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -57,7 +64,9 @@ export const CrmView: React.FC = () => {
         <>
             {selectedLead ? (
                 <LeadDetailView 
-                    lead={selectedLead} 
+                    lead={selectedLead}
+                    tasks={allTasks.filter(t => t.leadId === selectedLead.id)} 
+                    onSaveTask={onSaveTask}
                     onBack={handleBackToList} 
                     onEdit={() => setEditingLead(selectedLead)}
                     onDelete={handleDeleteLead}
@@ -95,6 +104,7 @@ export const CrmView: React.FC = () => {
                                         <tr>
                                             <th className="p-3 text-left font-semibold w-2/5">Lead</th>
                                             <th className="p-3 text-left font-semibold">Status</th>
+                                            <th className="p-3 text-left font-semibold">Priority</th>
                                             <th className="p-3 text-left font-semibold">Score</th>
                                             <th className="p-3 text-left font-semibold">Last Contacted</th>
                                         </tr>
@@ -117,6 +127,9 @@ export const CrmView: React.FC = () => {
                                                 </td>
                                                 <td className="p-3">
                                                     <StatusBadge status={lead.status} />
+                                                </td>
+                                                <td className="p-3">
+                                                    <PriorityBadge priority={lead.priority} />
                                                 </td>
                                                 <td className="p-3">
                                                     <div className="flex items-center">

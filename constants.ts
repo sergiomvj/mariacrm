@@ -1,5 +1,5 @@
-import type { Space, Document, IngestionJob, Chunk, Lead, User, Activity, TenantSettings, MariaConfig, TeamMember, ApiKey, AbTest, Cadence, CadenceStep, VoiceSdrSettings, EnrichmentSettings, CalendarSettings, Insight, AnalyticsData, Conversation } from './types';
-import { DocumentType, IngestionStatus, LeadStatus, ActivityType, CadenceStepType, InsightType, Channel } from './types';
+import type { Space, Document, IngestionJob, Chunk, Lead, User, Activity, TenantSettings, MariaConfig, TeamMember, ApiKey, AbTest, Cadence, CadenceStep, VoiceSdrSettings, EnrichmentSettings, CalendarSettings, Insight, AnalyticsData, Conversation, Task } from './types';
+import { DocumentType, IngestionStatus, LeadStatus, LeadPriority, ActivityType, CadenceStepType, InsightType, Channel, TaskStatus } from './types';
 
 export const SPACES: Space[] = [
   { id: 'space-1', name: 'Product', description: 'All product specifications and features.', icon: 'product', docCount: 4 },
@@ -59,13 +59,13 @@ export const MOCK_USER: User = {
 };
 
 export const LEADS: Lead[] = [
-  { id: 'lead-1', name: 'Alice Johnson', company: 'Innovate Inc.', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', status: LeadStatus.NEW, score: 85, lastContacted: '2024-07-29', email: 'alice.j@innovate.com', phone: '555-0101', linkedin: 'linkedin.com/in/alicejohnson', companyWebsite: 'innovate.com', companyIndustry: 'Technology', leadSource: 'Website', owner: MOCK_USER.name, tags: ['High Priority', 'SaaS'] },
-  { id: 'lead-2', name: 'Bob Williams', company: 'Data Solutions', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704f', status: LeadStatus.WORKING, score: 72, lastContacted: '2024-07-28', email: 'bob.w@datasolutions.co', phone: '555-0102', companyIndustry: 'Analytics', leadSource: 'Referral', owner: 'Jane Smith', tags: ['Follow-up'] },
-  { id: 'lead-3', name: 'Charlie Brown', company: 'Synergy Corp.', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704a', status: LeadStatus.QUALIFIED, score: 95, lastContacted: '2024-07-25', email: 'charlie@synergy.com', phone: '555-0103', linkedin: 'linkedin.com/in/charliebrown', companyWebsite: 'synergy.com', companyIndustry: 'Consulting', leadSource: 'Cold Outreach', owner: MOCK_USER.name, tags: ['Demo Booked', 'Decision Maker'] },
-  { id: 'lead-4', name: 'Diana Prince', company: 'Global Tech', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704b', status: LeadStatus.NURTURING, score: 68, lastContacted: '2024-07-20', email: 'diana.p@globaltech.net', phone: '555-0104', companyWebsite: 'globaltech.net', leadSource: 'Webinar', owner: 'Jane Smith', tags: ['Case Study Sent'] },
-  { id: 'lead-5', name: 'Ethan Hunt', company: 'Future Systems', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704c', status: LeadStatus.DISQUALIFIED, score: 30, lastContacted: '2024-07-15', email: 'ethan.h@future.io', phone: '555-0105', leadSource: 'Website', owner: MOCK_USER.name, tags: ['Budget Issue'] },
-  { id: 'lead-6', name: 'Fiona Glenanne', company: 'CloudNet', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', status: LeadStatus.NEW, score: 88, lastContacted: '2024-07-30', email: 'fiona.g@cloudnet.com', phone: '555-0106', linkedin: 'linkedin.com/in/fionaglenanne', companyWebsite: 'cloudnet.com', companyIndustry: 'IT Services', leadSource: 'LinkedIn', owner: MOCK_USER.name, tags: ['High Priority'] },
-  { id: 'lead-7', name: 'George Costanza', company: 'Vandelay Industries', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e290267042', status: LeadStatus.WORKING, score: 75, lastContacted: '2024-07-29', email: 'george.c@vandelay.com', phone: '555-0107', companyIndustry: 'Logistics', leadSource: 'Referral', owner: 'Jane Smith', tags: ['Needs Follow-up'] },
+  { id: 'lead-1', name: 'Alice Johnson', company: 'Innovate Inc.', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', status: LeadStatus.NEW, priority: LeadPriority.HIGH, score: 85, lastContacted: '2024-07-29', email: 'alice.j@innovate.com', phone: '555-0101', linkedin: 'linkedin.com/in/alicejohnson', companyWebsite: 'innovate.com', companyIndustry: 'Technology', leadSource: 'Website', owner: MOCK_USER.name, tags: ['High Priority', 'SaaS'] },
+  { id: 'lead-2', name: 'Bob Williams', company: 'Data Solutions', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704f', status: LeadStatus.WORKING, priority: LeadPriority.MEDIUM, score: 72, lastContacted: '2024-07-28', email: 'bob.w@datasolutions.co', phone: '555-0102', companyIndustry: 'Analytics', leadSource: 'Referral', owner: 'Jane Smith', tags: ['Follow-up'] },
+  { id: 'lead-3', name: 'Charlie Brown', company: 'Synergy Corp.', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704a', status: LeadStatus.QUALIFIED, priority: LeadPriority.CRITICAL, score: 95, lastContacted: '2024-07-25', email: 'charlie@synergy.com', phone: '555-0103', linkedin: 'linkedin.com/in/charliebrown', companyWebsite: 'synergy.com', companyIndustry: 'Consulting', leadSource: 'Cold Outreach', owner: MOCK_USER.name, tags: ['Demo Booked', 'Decision Maker'] },
+  { id: 'lead-4', name: 'Diana Prince', company: 'Global Tech', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704b', status: LeadStatus.NURTURING, priority: LeadPriority.LOW, score: 68, lastContacted: '2024-07-20', email: 'diana.p@globaltech.net', phone: '555-0104', companyWebsite: 'globaltech.net', leadSource: 'Webinar', owner: 'Jane Smith', tags: ['Case Study Sent'] },
+  { id: 'lead-5', name: 'Ethan Hunt', company: 'Future Systems', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704c', status: LeadStatus.DISQUALIFIED, priority: LeadPriority.LOW, score: 30, lastContacted: '2024-07-15', email: 'ethan.h@future.io', phone: '555-0105', leadSource: 'Website', owner: MOCK_USER.name, tags: ['Budget Issue'] },
+  { id: 'lead-6', name: 'Fiona Glenanne', company: 'CloudNet', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', status: LeadStatus.NEW, priority: LeadPriority.HIGH, score: 88, lastContacted: '2024-07-30', email: 'fiona.g@cloudnet.com', phone: '555-0106', linkedin: 'linkedin.com/in/fionaglenanne', companyWebsite: 'cloudnet.com', companyIndustry: 'IT Services', leadSource: 'LinkedIn', owner: MOCK_USER.name, tags: ['High Priority'] },
+  { id: 'lead-7', name: 'George Costanza', company: 'Vandelay Industries', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e290267042', status: LeadStatus.WORKING, priority: LeadPriority.MEDIUM, score: 75, lastContacted: '2024-07-29', email: 'george.c@vandelay.com', phone: '555-0107', companyIndustry: 'Logistics', leadSource: 'Referral', owner: 'Jane Smith', tags: ['Needs Follow-up'] },
 ];
 
 export const ACTIVITIES: Activity[] = [
@@ -98,10 +98,19 @@ export const MARIA_CONFIG: MariaConfig = {
 };
 
 export const TEAM_MEMBERS: TeamMember[] = [
-    { id: 'tm-1', name: 'John Doe', email: 'john.doe@example.com', role: 'Tenant Admin', status: 'Active', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
-    { id: 'tm-2', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Sales Rep', status: 'Active', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704a' },
-    { id: 'tm-3', name: 'Peter Jones', email: 'peter.jones@example.com', role: 'Marketing', status: 'Invited', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704b' },
+    { id: 'user-1', name: 'John Doe', email: 'john.doe@example.com', role: 'Tenant Admin', status: 'Active', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+    { id: 'user-2', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Sales Rep', status: 'Active', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704a' },
+    { id: 'user-3', name: 'Peter Jones', email: 'peter.jones@example.com', role: 'Marketing', status: 'Invited', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704b' },
 ];
+
+export const TASKS: Task[] = [
+    { id: 'task-1', title: 'Follow up on proposal', leadId: 'lead-3', assigneeId: 'user-1', dueDate: '2024-08-05', status: TaskStatus.TODO, notes: 'Charlie mentioned he would review the proposal by EOD Monday.' },
+    { id: 'task-2', title: 'Prepare for discovery call', leadId: 'lead-2', assigneeId: 'user-2', dueDate: '2024-08-02', status: TaskStatus.IN_PROGRESS },
+    { id: 'task-3', title: 'Send welcome sequence email #2', leadId: 'lead-1', assigneeId: 'user-1', dueDate: '2024-08-01', status: TaskStatus.DONE },
+    { id: 'task-4', title: 'Research Vandelay Industries new logistics wing', leadId: 'lead-7', assigneeId: 'user-2', dueDate: '2024-08-03', status: TaskStatus.TODO },
+    { id: 'task-5', title: 'Update internal competitor matrix', leadId: null, assigneeId: 'user-1', dueDate: '2024-08-10', status: TaskStatus.TODO, notes: 'Need to add Competitor E details.' },
+];
+
 
 export const API_KEYS: ApiKey[] = [
     { id: 'key-1', name: 'N8N Automation', key: 'sk_live_...aBc1', createdAt: '2024-06-01', lastUsed: '2024-07-30' },

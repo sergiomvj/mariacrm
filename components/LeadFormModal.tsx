@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Lead } from '../types';
-import { LeadStatus } from '../types';
+import { LeadStatus, LeadPriority } from '../types';
 import { MOCK_USER } from '../constants';
 
 interface LeadFormModalProps {
@@ -14,6 +14,7 @@ const initialFormData = {
     company: '',
     avatarUrl: `https://i.pravatar.cc/150?u=${Math.random()}`,
     status: LeadStatus.NEW,
+    priority: LeadPriority.MEDIUM,
     score: 50,
     email: '',
     phone: '',
@@ -39,6 +40,7 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({ lead, onSave, onCl
                 company: lead.company,
                 avatarUrl: lead.avatarUrl,
                 status: lead.status,
+                priority: lead.priority,
                 score: lead.score,
                 email: lead.email,
                 phone: lead.phone,
@@ -128,13 +130,23 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({ lead, onSave, onCl
                             </div>
                         </div>
 
-                         <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-muted-foreground">Status</label>
-                            <select name="status" id="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full bg-input border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary">
-                                {Object.values(LeadStatus).map(status => (
-                                    <option key={status} value={status}>{status}</option>
-                                ))}
-                            </select>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="status" className="block text-sm font-medium text-muted-foreground">Status</label>
+                                <select name="status" id="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full bg-input border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary">
+                                    {Object.values(LeadStatus).map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                            </div>
+                             <div>
+                                <label htmlFor="priority" className="block text-sm font-medium text-muted-foreground">Priority</label>
+                                <select name="priority" id="priority" value={formData.priority} onChange={handleChange} className="mt-1 block w-full bg-input border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary">
+                                    {Object.values(LeadPriority).map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         
                         <div>

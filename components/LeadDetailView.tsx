@@ -1,12 +1,15 @@
-import React from 'react';
-import type { Lead, Activity } from '../types';
-import { ActivityType } from '../types';
-import { ACTIVITIES } from '../constants';
+import React, { useState } from 'react';
+import type { Lead, Activity, Task } from '../types';
+import { ActivityType, TaskStatus } from '../types';
+import { ACTIVITIES, TEAM_MEMBERS } from '../constants';
 import { InsightsPanel } from './InsightsPanel';
 import { StatusBadge } from './StatusBadge';
+import { TaskFormModal } from './TaskFormModal';
 
 interface LeadDetailViewProps {
     lead: Lead;
+    tasks: Task[];
+    onSaveTask: (task: Task) => void;
     onBack: () => void;
     onEdit: () => void;
     onDelete: (leadId: string) => void;
@@ -34,11 +37,52 @@ const InfoItem: React.FC<{ label: string; value?: string; children?: React.React
     );
 };
 
-export const LeadDetailView: React.FC<LeadDetailViewProps> = ({ lead, onBack, onEdit, onDelete }) => {
+const TaskListItem: React.FC<{ task: Task; onStatusChange: (status: TaskStatus) => void; }> = ({ task, onStatusChange }) => {
+    const assignee = TEAM_MEMBERS.find(m => m.id === task.assigneeId);
+    const isDone = task.status === TaskStatus.DONE;
+    
+    return (
+        <div className="flex items-start gap-3 p-3 hover:bg-secondary/50 rounded-md">
+            <input 
+                type="checkbox" 
+                checked={isDone} 
+                onChange={() => onStatusChange(isDone ? TaskStatus.TODO : TaskStatus.DONE)}
+                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <div className="flex-1">
+                <p className={`font-medium ${isDone ? 'line-through text-muted-foreground' : ''}`}>{task.title}</p>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                    {assignee && (
+                         <div className="flex items-center gap-1.5">
+                            <img src={assignee.avatarUrl} alt={assignee.name} className="h-4 w-4 rounded-full" />
+                            <span>{assignee.name}</span>
+                        </div>
+                    )}
+                    <span>Due: {task.dueDate}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const LeadDetailView: React.FC<LeadDetailViewProps> = ({ lead, tasks, onSaveTask, onBack, onEdit, onDelete }) => {
+    const [activeTab, setActiveTab] = useState<'timeline' | 'tasks'>('timeline');
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const leadActivities = ACTIVITIES.filter(a => a.leadId === lead.id);
+
+    const handleTaskStatusChange = (task: Task, newStatus: TaskStatus) => {
+        onSaveTask({ ...task, status: newStatus });
+    };
 
     return (
         <div className="flex-1 p-6 md:p-8 flex flex-col h-full overflow-y-auto">
+            {isTaskModalOpen && (
+                <TaskFormModal 
+                    onClose={() => setIsTaskModalOpen(false)}
+                    onSave={onSaveTask}
+                    leadId={lead.id}
+                />
+            )}
             {/* Header */}
             <header className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center gap-4">
@@ -114,36 +158,69 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({ lead, onBack, on
                     </div>
                 </div>
 
-                {/* Right Panel: Unified Timeline */}
+                {/* Right Panel: Tabbed View */}
                 <div className="lg:col-span-2 flex flex-col">
-                    <h2 className="text-xl font-semibold mb-4">Unified Timeline</h2>
-                    <div className="flex-1 space-y-6 overflow-y-auto pr-2">
-                        {leadActivities.length > 0 ? leadActivities.map(activity => (
-                             <div key={activity.id} className="flex gap-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="p-2 bg-secondary rounded-full border border-border">
-                                        <ActivityIcon type={activity.type} />
-                                    </div>
-                                    <div className="w-px flex-1 bg-border"></div>
-                                </div>
-                                <div className="flex-1 pb-6">
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-semibold">{activity.type}</p>
-                                        <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
-                                    </div>
-                                    <p className="mt-1 text-sm text-muted-foreground">{activity.notes}</p>
-                                    <div className="flex items-center mt-2">
-                                        <img className="h-5 w-5 rounded-full mr-2" src={activity.author.avatarUrl} alt={activity.author.name} />
-                                        <span className="text-xs text-muted-foreground">{activity.author.name}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="text-center py-10">
-                                <p className="text-muted-foreground">No activities recorded for this lead yet.</p>
-                            </div>
-                        )}
+                    <div className="border-b border-border">
+                        <nav className="-mb-px flex space-x-6">
+                            <button onClick={() => setActiveTab('timeline')} className={`py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'timeline' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+                                Unified Timeline
+                            </button>
+                             <button onClick={() => setActiveTab('tasks')} className={`py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'tasks' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+                                Tasks
+                            </button>
+                        </nav>
                     </div>
+
+                    {activeTab === 'timeline' && (
+                        <div className="flex-1 space-y-6 overflow-y-auto pr-2 pt-6">
+                            {leadActivities.length > 0 ? leadActivities.map(activity => (
+                                <div key={activity.id} className="flex gap-4">
+                                    <div className="flex flex-col items-center">
+                                        <div className="p-2 bg-secondary rounded-full border border-border">
+                                            <ActivityIcon type={activity.type} />
+                                        </div>
+                                        <div className="w-px flex-1 bg-border"></div>
+                                    </div>
+                                    <div className="flex-1 pb-6">
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-semibold">{activity.type}</p>
+                                            <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                                        </div>
+                                        <p className="mt-1 text-sm text-muted-foreground">{activity.notes}</p>
+                                        <div className="flex items-center mt-2">
+                                            <img className="h-5 w-5 rounded-full mr-2" src={activity.author.avatarUrl} alt={activity.author.name} />
+                                            <span className="text-xs text-muted-foreground">{activity.author.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="text-center py-10">
+                                    <p className="text-muted-foreground">No activities recorded for this lead yet.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {activeTab === 'tasks' && (
+                        <div className="flex-1 pt-6">
+                            <button onClick={() => setIsTaskModalOpen(true)} className="w-full bg-secondary text-secondary-foreground font-semibold py-2 rounded-md hover:bg-muted transition-colors text-sm mb-4">
+                                Add Task
+                            </button>
+                            <div className="space-y-1">
+                                {tasks.length > 0 ? tasks.map(task => (
+                                    <TaskListItem 
+                                        key={task.id} 
+                                        task={task} 
+                                        onStatusChange={(newStatus) => handleTaskStatusChange(task, newStatus)}
+                                    />
+                                )) : (
+                                    <div className="text-center py-10">
+                                        <p className="text-muted-foreground">No tasks for this lead yet.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

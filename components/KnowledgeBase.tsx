@@ -53,7 +53,14 @@ const StatusBadge = ({ status }: { status: IngestionStatus }) => {
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 }
 
-const SpaceCard = ({ space, onClick, isSelected }: { space: Space, onClick: () => void, isSelected: boolean }) => (
+interface SpaceCardProps {
+    space: Space;
+    onClick: () => void;
+    isSelected: boolean;
+}
+
+// FIX: Refactored the `SpaceCard` component to use `React.FC` with a dedicated props interface. This is a more robust way to type components and resolves a TypeScript error where the special `key` prop, required by React for lists, was incorrectly being flagged as an undeclared property on the component.
+const SpaceCard: React.FC<SpaceCardProps> = ({ space, onClick, isSelected }) => (
     <div
         onClick={onClick}
         className={`p-4 border rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-primary/20 border-primary' : 'bg-secondary border-border hover:border-primary/50'}`}

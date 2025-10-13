@@ -62,12 +62,20 @@ export enum LeadStatus {
   DISQUALIFIED = 'Disqualified',
 }
 
+export enum LeadPriority {
+  LOW = 'Low',
+  MEDIUM = 'Medium',
+  HIGH = 'High',
+  CRITICAL = 'Critical',
+}
+
 export interface Lead {
   id: string;
   name: string;
   company: string;
   avatarUrl: string;
   status: LeadStatus;
+  priority: LeadPriority;
   score: number;
   lastContacted: string;
   email: string;
@@ -107,6 +115,24 @@ export interface Activity {
         avatarUrl: string;
     };
 }
+
+// Task Management Types
+export enum TaskStatus {
+    TODO = 'To Do',
+    IN_PROGRESS = 'In Progress',
+    DONE = 'Done',
+}
+
+export interface Task {
+    id: string;
+    title: string;
+    leadId: string | null;
+    assigneeId: string;
+    dueDate: string;
+    status: TaskStatus;
+    notes?: string;
+}
+
 
 // Types for Settings and Maria View
 export interface TenantSettings {
